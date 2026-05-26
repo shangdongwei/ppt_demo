@@ -2,3 +2,98 @@ python-pptx>=0.6.23
 gradio>=4.31.0
 lxml>=4.9.0
 Pillow>=10.0.0
+
+
+
+
+import os
+import requests
+
+# ------------------- 配置（你只改这 3 行）-------------------
+GITHUB_HOST = "https://alm-github.system.uk.hsbc"
+GITHUB_TOKEN = "你的汇丰私有GitHub Token"
+API_PREFIX = "/api/v3"
+# -------------------------------------------------------------
+
+BASE_URL = GITHUB_HOST + API_PREFIX
+HEADERS = {
+    "Authorization": f"token {GITHUB_TOKEN}",
+    "Accept": "application/vnd.github+json"
+}
+
+def list_repos():
+    """列出自己的私有仓库"""
+    url = f"{BASE_URL}/user/repos"
+    r = requests.get(url, headers=HEADERS)
+    r.raise_for_status()
+    repos = r.json()
+    print("\n=== 你的仓库 ===")
+    for repo in repos:
+        print(f"- {repo['full_name']}")
+    return repos
+
+def get_file_content(repo_fullname, path, ref="main"):
+    """查看文件内容"""
+    url = f"{BASE_URL}/repos/{repo_fullname}/contents/{path}"
+    params = {"ref": ref}
+    r = requests.get(url, headers=HEADERS, params=params)
+    r.raise_for_status()
+    data = r.json()
+    import base64
+    content = base64.b64decode(data["content"]).decode("utf-8")
+    print(f"\n=== {repo_fullname}/{path} ===")
+    print(content)
+    return content
+
+def create_issue(repo_fullname, title, body=""):
+    """创建 Issue"""
+    url = f"{BASE_URL}/repos/{repo_fullname}/issues"
+    payload = {"title": title, "body": body}
+    r = requests.post(url, headers=HEADERS, json=payload)
+    r.raise_for_status()
+    issue = r.json()
+    print(f"\n✅ 已创建 Issue：{issue['html_url']}")
+    return issue
+
+def list_issues(repo_fullname, state="open"):
+    """列出仓库 Issue"""
+    url = f"{BASE_URL}/repos/{repo_fullname}/issues"
+    params = {"state": state}
+    r = requests.get(url, headers=HEADERS, params=params)
+    r.raise_for_status()
+    issues = r.json()
+    print(f"\n=== {repo_fullname} [{state}] Issues ===")
+    for iss in issues:
+        print(f"#{iss['number']} {iss['title']}")
+    return issues
+
+def main():
+    while True:
+        print("\n===== HSBC 私有 GitHub 工具 =====")
+        print("1. 列出我的仓库")
+        print("2. 查看文件内容")
+        print("3. 创建 Issue")
+        print("4. 列出 Issue")
+        print("0. 退出")
+        choice = input("请输入功能编号：").strip()
+        if choice == "0":
+            break
+        elif choice == "1":
+            list_repos()
+        elif choice == "2":
+            repo = input("仓库全名（如 org/repo）：").strip()
+            path = input("文件路径：").strip()
+            get_file_content(repo, path)
+        elif choice == "3":
+            repo = input("仓库全名：").strip()
+            title = input("Issue 标题：").strip()
+            body = input("Issue 内容（可选）：").strip()
+            create_issue(repo, title, body)
+        elif choice == "4":
+            repo = input("仓库全名：").strip()
+            list_issues(repo)
+        else:
+            print("无效选项")
+
+if __name__ == "__main__":
+    main()
