@@ -1,11 +1,3 @@
-python-pptx>=0.6.23
-gradio>=4.31.0
-lxml>=4.9.0
-Pillow>=10.0.0
-
-
-
-
 import os
 import requests
 
