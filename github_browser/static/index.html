@@ -1,0 +1,92 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>GitHub 仓库目录浏览器</title>
+    <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/styles/github.min.css"
+    />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="header">
+      <div class="header__title">GitHub 仓库目录浏览器</div>
+      <div class="header__subtitle">
+        仅在浏览器本地使用令牌，不经由服务端转发
+      </div>
+    </header>
+
+    <main class="layout">
+      <section class="panel panel--controls">
+        <div class="field">
+          <label class="label" for="repoUrl">GitHub 链接</label>
+          <input
+            id="repoUrl"
+            class="input"
+            placeholder="https://github.com/owner/repo 或 https://github.com/owner/repo/tree/branch/path"
+            autocomplete="off"
+          />
+          <div class="hint" id="repoHint"></div>
+        </div>
+
+        <div class="row">
+          <button id="loadBtn" class="btn btn--primary">加载目录</button>
+          <button id="loadAllBtn" class="btn">加载完整目录</button>
+          <button id="clearCacheBtn" class="btn">清除缓存</button>
+        </div>
+
+        <div class="field">
+          <label class="label" for="tokenInput">GitHub Token（PAT）</label>
+          <input
+            id="tokenInput"
+            class="input"
+            type="password"
+            placeholder="可选：访问私有仓库需要 repo 权限"
+            autocomplete="off"
+          />
+          <div class="row row--tight">
+            <button id="saveSessionBtn" class="btn">保存到会话</button>
+            <button id="saveLocalBtn" class="btn">保存到本地</button>
+            <button id="clearAuthBtn" class="btn btn--danger">取消授权</button>
+          </div>
+          <div class="hint">
+            建议默认仅保存到会话（关闭标签页自动清除）。保存到本地会增加泄露风险。
+          </div>
+        </div>
+
+        <div class="status">
+          <div class="status__row">
+            <span class="status__label">速率限制</span>
+            <span class="status__value" id="rateLimitText">未知</span>
+          </div>
+          <div class="status__row">
+            <span class="status__label">当前仓库</span>
+            <span class="status__value" id="repoMetaText">未加载</span>
+          </div>
+        </div>
+
+        <div class="error" id="errorBox" hidden></div>
+      </section>
+
+      <section class="panel panel--tree">
+        <div class="panel__title">目录</div>
+        <div id="treeRoot" class="tree"></div>
+      </section>
+
+      <section class="panel panel--viewer">
+        <div class="panel__title">
+          <span>文件</span>
+          <span class="panel__title__path" id="filePathText"></span>
+        </div>
+        <div id="fileViewer" class="viewer">
+          <div class="viewer__empty">点击左侧文件节点查看内容</div>
+        </div>
+      </section>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/highlight.js@11.11.1/lib/common.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
